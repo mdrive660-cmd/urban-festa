@@ -20,11 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
         once: true,
     });
 
-    // --- TypeIt Typewriter Effect ---
+    // --- TypeIt Typewriter Effect (Updated with your info) ---
     new TypeIt("#hero-headline", {
         speed: 50,
         startDelay: 900,
-        strings: ["Hi, I'm [Your Name]", "I'm a Web Developer."],
+        strings: ["Hi, I'm Anand Kumar", "I'm a Data & Cloud Professional."],
         breakLines: false,
         loop: true,
     }).go();
