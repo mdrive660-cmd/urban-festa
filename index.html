@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Name | Web Developer</title>
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
@@ -22,39 +23,50 @@
     </nav>
 
     <header id="hero" class="hero-section">
-        <h1>Hi, I'm [Your Name]</h1>
+        <h1 id="hero-headline"></h1> 
         <p>A Passionate Web Developer Crafting Modern Digital Experiences.</p>
-        <a href="#projects" class="cta-button">View My Work</a>
+        <div class="hero-buttons">
+            <a href="#projects" class="cta-button">View My Work</a>
+            <a href="resume_sample.pdf" class="cta-button secondary" download>Download Resume 📜</a>
+        </div>
     </header>
 
     <main>
-        <section id="about" class="content-section">
+        <section id="about" class="content-section" data-aos="fade-up">
             <h2>About Me</h2>
-            <p>I specialize in front-end development with a keen eye for design and user experience. I love building clean, intuitive, and responsive web applications. My skills include HTML, CSS, JavaScript, and modern frameworks like React.</p>
+            <p>I specialize in front-end development... (rest of your text)</p>
         </section>
 
         <section id="projects" class="content-section">
-            <h2>My Projects</h2>
-            <div class="project-grid">
-                <div class="project-card">
-                    <h3>Project Title One</h3>
-                    <p>A brief description of the project, the technologies used, and what you learned.</p>
-                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
-                </div>
-                <div class="project-card">
-                    <h3>Project Title Two</h3>
-                    <p>A brief description of the project, the technologies used, and what you learned.</p>
-                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
-                </div>
-                <div class="project-card">
-                    <h3>Project Title Three</h3>
-                    <p>A brief description of the project, the technologies used, and what you learned.</p>
-                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
-                </div>
+            <h2 data-aos="fade-up">My Projects</h2>
+
+            <div class="filter-buttons" data-aos="fade-up">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="frontend">Front-End</button>
+                <button class="filter-btn" data-filter="backend">Back-End</button>
+                <button class="filter-btn" data-filter="fullstack">Full-Stack</button>
             </div>
+
+            <div class="project-grid">
+                <div class="project-card" data-category="frontend" data-aos="fade-up" data-aos-delay="100">
+                    <h3>Project Title One</h3>
+                    <p>A brief description of a front-end project...</p>
+                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
+                </div>
+                <div class="project-card" data-category="backend" data-aos="fade-up" data-aos-delay="200">
+                    <h3>Project Title Two</h3>
+                    <p>A brief description of a back-end project...</p>
+                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
+                </div>
+                <div class="project-card" data-category="fullstack" data-aos="fade-up" data-aos-delay="300">
+                    <h3>Project Title Three</h3>
+                    <p>A brief description of a full-stack project...</p>
+                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
+                </div>
+                </div>
         </section>
 
-        <section id="contact" class="content-section">
+        <section id="contact" class="content-section" data-aos="fade-up">
             <h2>Get In Touch</h2>
             <p>I'm currently open to new opportunities. Feel free to reach out!</p>
             <a href="mailto:your.email@example.com" class="cta-button">Email Me</a>
@@ -65,6 +77,8 @@
         <p>&copy; 2025 [Your Name]. All Rights Reserved.</p>
     </footer>
 
+    <script src="https://unpkg.com/typeit@8.7.1/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
