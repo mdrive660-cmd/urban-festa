@@ -14,13 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
         themeToggle.textContent = isDark ? '🌙' : '☀️';
     });
 
-    // --- AOS Scroll Animations --- ✨
+    // --- AOS Scroll Animations ---
     AOS.init({
-        duration: 1000, // values from 0 to 3000, with step 50ms
-        once: true,     // whether animation should happen only once - while scrolling down
+        duration: 1000,
+        once: true,
     });
 
-    // --- TypeIt Typewriter Effect --- ✨
+    // --- TypeIt Typewriter Effect ---
     new TypeIt("#hero-headline", {
         speed: 50,
         startDelay: 900,
@@ -29,13 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
         loop: true,
     }).go();
 
-    // --- Project Filtering --- ✨
+    // --- Project Filtering ---
     const filterButtons = document.querySelectorAll('.filter-btn');
     const projectCards = document.querySelectorAll('.project-card');
 
     filterButtons.forEach(button => {
         button.addEventListener('click', () => {
-            // Set active class on button
             filterButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
 
