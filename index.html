@@ -1,38 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Your Name - Portfolio</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Name | Web Developer</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <h1>Your Name</h1>
-    <p>Web Developer • Designer • Portfolio</p>
-  </header>
-  <section id="about">
-    <h2>About Me</h2>
-    <p>Brief introduction about yourself. Your skills, interests, and what you are passionate about.</p>
-  </section>
-  <section id="projects">
-    <h2>Projects</h2>
-    <div class="project">
-      <h3>Project Title</h3>
-      <p>Short description of your project. <a href="#">View on GitHub</a></p>
-    </div>
-    <!-- Add more projects as needed -->
-  </section>
-  <section id="contact">
-    <h2>Contact</h2>
-    <ul>
-      <li>Email: <a href="mailto:your.email@example.com">your.email@example.com</a></li>
-      <li>LinkedIn: <a href="https://linkedin.com/in/yourprofile" target="_blank">yourprofile</a></li>
-      <!-- Add more contact info if needed -->
-    </ul>
-  </section>
-  <footer>
-    &copy; 2025 Your Name
-  </footer>
+
+    <nav class="navbar">
+        <div class="nav-brand">Your Name</div>
+        <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <div class="theme-switcher">
+            <button id="theme-toggle">🌙</button>
+        </div>
+    </nav>
+
+    <header id="hero" class="hero-section">
+        <h1>Hi, I'm [Your Name]</h1>
+        <p>A Passionate Web Developer Crafting Modern Digital Experiences.</p>
+        <a href="#projects" class="cta-button">View My Work</a>
+    </header>
+
+    <main>
+        <section id="about" class="content-section">
+            <h2>About Me</h2>
+            <p>I specialize in front-end development with a keen eye for design and user experience. I love building clean, intuitive, and responsive web applications. My skills include HTML, CSS, JavaScript, and modern frameworks like React.</p>
+        </section>
+
+        <section id="projects" class="content-section">
+            <h2>My Projects</h2>
+            <div class="project-grid">
+                <div class="project-card">
+                    <h3>Project Title One</h3>
+                    <p>A brief description of the project, the technologies used, and what you learned.</p>
+                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
+                </div>
+                <div class="project-card">
+                    <h3>Project Title Two</h3>
+                    <p>A brief description of the project, the technologies used, and what you learned.</p>
+                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
+                </div>
+                <div class="project-card">
+                    <h3>Project Title Three</h3>
+                    <p>A brief description of the project, the technologies used, and what you learned.</p>
+                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="content-section">
+            <h2>Get In Touch</h2>
+            <p>I'm currently open to new opportunities. Feel free to reach out!</p>
+            <a href="mailto:your.email@example.com" class="cta-button">Email Me</a>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 [Your Name]. All Rights Reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
