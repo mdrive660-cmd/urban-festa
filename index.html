@@ -1,13 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>React Drawing Pad</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Calculator</title>
+  <style>
+    body {
+      background: #f4f4f4;
+      font-family: Arial, sans-serif;
+    }
+    .calculator {
+      width: 300px;
+      margin: 60px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .display {
+      width: 100%;
+      height: 50px;
+      background: #222;
+      color: #fff;
+      font-size: 2em;
+      text-align: right;
+      border-radius: 8px;
+      padding: 10px;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    button {
+      padding: 18px;
+      font-size: 1.2em;
+      border: none;
+      background: #e4e4e4;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button.operator {
+      background: #ffd86b;
+    }
+    button.equal {
+      background: #34c759;
+      color: #fff;
+      grid-column: span 2;
+    }
+    button.clear {
+      background: #ff6b6b;
+      color: #fff;
+    }
+    button:active {
+      background: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div id="display" class="display">0</div>
+    <div class="buttons">
+      <button onclick="clearDisplay()" class="clear">C</button>
+      <button onclick="inputValue('(')">(</button>
+      <button onclick="inputValue(')')">)</button>
+      <button onclick="inputValue('/')" class="operator">&divide;</button>
+      <button onclick="inputValue('7')">7</button>
+      <button onclick="inputValue('8')">8</button>
+      <button onclick="inputValue('9')">9</button>
+      <button onclick="inputValue('*')" class="operator">&times;</button>
+      <button onclick="inputValue('4')">4</button>
+      <button onclick="inputValue('5')">5</button>
+      <button onclick="inputValue('6')">6</button>
+      <button onclick="inputValue('-')" class="operator">&minus;</button>
+      <button onclick="inputValue('1')">1</button>
+      <button onclick="inputValue('2')">2</button>
+      <button onclick="inputValue('3')">3</button>
+      <button onclick="inputValue('+')" class="operator">+</button>
+      <button onclick="inputValue('0')">0</button>
+      <button onclick="inputValue('.')">.</button>
+      <button onclick="calculate()" class="equal">=</button>
+    </div>
+  </div>
+  <script>
+    let display = document.getElementById('display');
+    let currentInput = "";
+
+    function inputValue(val) {
+      if (currentInput === "" && (val === "+" || val === "*" || val === "/" || val === ")")) return;
+      if (currentInput === "" && val === "-") {
+        // allow negative numbers at start
+        currentInput = "-";
+        display.textContent = "-";
+        return;
+      }
+      currentInput += val;
+      display.textContent = currentInput;
+    }
+
+    function clearDisplay() {
+      currentInput = "";
+      display.textContent = "0";
+    }
+
+    function calculate() {
+      try {
+        // eslint-disable-next-line no-eval
+        let result = eval(currentInput);
+        display.textContent = result;
+        currentInput = result.toString();
+      } catch (e) {
+        display.textContent = "Error";
+        currentInput = "";
+      }
+    }
+  </script>
+</body>
 </html>
