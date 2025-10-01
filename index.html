@@ -34,13 +34,38 @@
 
     <main>
         <section id="about" class="content-section" data-aos="fade-up">
-             <h2>About Me</h2>
-             <p>I specialize in front-end development... (rest of your text)</p>
+            <h2>About Me</h2>
+            <p>I specialize in front-end development with a keen eye for design and user experience. I love building clean, intuitive, and responsive web applications. My skills include HTML, CSS, JavaScript, and modern frameworks like React.</p>
         </section>
 
         <section id="projects" class="content-section">
-             <h2 data-aos="fade-up">My Projects</h2>
-             </section>
+            <h2 data-aos="fade-up">My Projects</h2>
+
+            <div class="filter-buttons" data-aos="fade-up">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="frontend">Front-End</button>
+                <button class="filter-btn" data-filter="backend">Back-End</button>
+                <button class="filter-btn" data-filter="fullstack">Full-Stack</button>
+            </div>
+
+            <div class="project-grid">
+                <div class="project-card" data-category="frontend" data-aos="fade-up" data-aos-delay="100">
+                    <h3>Project Title One</h3>
+                    <p>A brief description of a front-end project...</p>
+                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
+                </div>
+                <div class="project-card" data-category="backend" data-aos="fade-up" data-aos-delay="200">
+                    <h3>Project Title Two</h3>
+                    <p>A brief description of a back-end project...</p>
+                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
+                </div>
+                <div class="project-card" data-category="fullstack" data-aos="fade-up" data-aos-delay="300">
+                    <h3>Project Title Three</h3>
+                    <p>A brief description of a full-stack project...</p>
+                    <a href="#" target="_blank">Live Demo</a> | <a href="#" target="_blank">GitHub</a>
+                </div>
+            </div>
+        </section>
 
         <section id="downloads" class="content-section">
             <h2 data-aos="fade-up">Downloads</h2>
@@ -64,7 +89,7 @@
                     <a href="downloads/ui-ux-cheatsheet.pdf" class="download-btn" download>Download .pdf</a>
                 </div>
 
-                </div>
+            </div>
         </section>
 
         <section id="contact" class="content-section" data-aos="fade-up">
