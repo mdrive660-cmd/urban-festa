@@ -98,6 +98,12 @@ body.dark-theme .nav-links a { color: var(--text-color-dark); }
     max-width: 600px;
 }
 
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
 .cta-button {
     display: inline-block;
     background: var(--primary-color);
@@ -105,12 +111,22 @@ body.dark-theme .nav-links a { color: var(--text-color-dark); }
     padding: 12px 24px;
     border-radius: 5px;
     text-decoration: none;
-    margin-top: 1.5rem;
     transition: background-color 0.3s;
 }
 
 .cta-button:hover {
     background: var(--primary-hover);
+}
+
+.cta-button.secondary {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.cta-button.secondary:hover {
+    background: var(--primary-color);
+    color: #fff;
 }
 
 /* --- Content Sections --- */
@@ -139,7 +155,7 @@ h2 {
     padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: transform 0.3s, box-shadow 0.3s, opacity 0.5s, width 0.5s;
     text-align: left;
 }
 
@@ -161,42 +177,13 @@ body.dark-theme .project-card { background-color: var(--card-bg-dark); }
     font-weight: 600;
 }
 
-/* --- Footer --- */
-footer {
-    text-align: center;
-    padding: 2rem;
-    margin-top: 2rem;
-    border-top: 1px solid #ddd;
-}
-
-body.dark-theme footer { border-top-color: #333; }
-
-/* --- Responsive Design --- */
-@media(max-width: 768px) {
-    .nav-links {
-        display: none; /* Simple hiding for mobile, can be replaced with a hamburger menu */
-    }
-    .hero-section h1 { font-size: 2.5rem; }
-}
-
-/* --- (Keep all your existing CSS from before) --- */
-
-/* --- Hero Section Updates --- */
-.hero-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
-}
-
-.cta-button.secondary {
-    background: transparent;
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-}
-
-.cta-button.secondary:hover {
-    background: var(--primary-color);
-    color: #fff;
+.project-card.hide {
+    transform: scale(0.8);
+    opacity: 0;
+    width: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
 }
 
 /* --- Project Filter Buttons --- */
@@ -225,18 +212,93 @@ body.dark-theme .filter-btn { color: var(--text-color-dark); border-color: #444;
     border-color: var(--primary-color);
 }
 
-/* --- Project Card Filtering Animation --- */
-.project-card {
-    /* ... (existing styles) */
-    transition: transform 0.3s, box-shadow 0.3s, opacity 0.5s, width 0.5s;
+/* --- Downloads Section --- */
+.download-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    text-align: left;
 }
 
-.project-card.hide {
-    transform: scale(0.8);
-    opacity: 0;
-    width: 0;
-    padding: 0;
+.download-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+body.light-theme .download-item { background-color: var(--card-bg-light); }
+body.dark-theme .download-item { background-color: var(--card-bg-dark); }
+
+.download-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+.file-icon {
+    font-size: 2.5rem;
+}
+
+.file-info {
+    flex-grow: 1;
+}
+
+.file-info h3 {
+    margin: 0 0 0.5rem 0;
+}
+
+.file-info p {
     margin: 0;
-    overflow: hidden;
+    font-size: 0.9rem;
+    opacity: 0.8;
 }
 
+.download-btn {
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.3s;
+}
+
+.download-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+/* --- Footer --- */
+footer {
+    text-align: center;
+    padding: 2rem;
+    margin-top: 2rem;
+    border-top: 1px solid #ddd;
+}
+
+body.dark-theme footer { border-top-color: #333; }
+
+/* --- Responsive Design --- */
+@media(max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+    .hero-section h1 { font-size: 2.5rem; }
+}
+
+@media(max-width: 600px) {
+    .download-item {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+    
+    .download-btn {
+        margin-top: 1rem;
+        align-self: flex-start;
+    }
+}
