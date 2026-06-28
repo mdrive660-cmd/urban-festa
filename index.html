@@ -179,108 +179,52 @@
         const FOLDER = 'papers'; // The folder where PDFs are kept
         const BRANCH = 'main';
 
-        // GitHub GraphQL API endpoint
-        const GRAPHQL_URL = 'https://api.github.com/graphql';
-        const CACHE_KEY = 'github_papers_cache_graphql';
-        const CACHE_DURATION = 3600000; // 1 hour in milliseconds
+        const CACHE_KEY = 'github_papers_cache_rest';
+        const CACHE_DURATION = 3600000; // 1 hour
 
-        // Set current year in footer
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        async function fetchPapersGraphQL() {
+        // Primary fetch uses the REST contents API which works for public repos without auth.
+        async function fetchPapers() {
             try {
                 const cachedData = getCachedData();
                 let papers;
 
                 if (cachedData) {
-                    // Use cached data
                     papers = cachedData;
-                    console.log('Using cached papers from GraphQL');
+                    console.log('Using cached papers (REST)');
                 } else {
-                    // Fetch from GraphQL API - no authentication required for public repos
-                    papers = await queryGitHubGraphQL();
-                    
-                    if (papers.length === 0) {
-                        console.warn('No papers found from GraphQL, attempting fallback');
-                        papers = await fallbackToRestAPI();
-                    }
-                    
-                    // Cache the response
+                    papers = await fetchPapersRest();
                     setCacheData(papers);
-                    console.log('Fetched fresh papers from GraphQL');
+                    console.log('Fetched fresh papers (REST)');
                 }
 
                 renderPapers(papers);
-
             } catch (error) {
-                console.error('GraphQL fetch error:', error);
+                console.error('Fetch error:', error);
                 handleError('Error loading test papers. Please try again later.');
             }
         }
 
-        async function queryGitHubGraphQL() {
-            const query = `
-            query {
-                repository(owner: "${USERNAME}", name: "${REPO}") {
-                    object(expression: "${BRANCH}:${FOLDER}") {
-                        ... on Tree {
-                            entries {
-                                name
-                                type
-                            }
-                        }
-                    }
-                }
-            }`;
+        async function fetchPapersRest() {
+            const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FOLDER}?ref=${BRANCH}`;
+            const response = await fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
 
-            const response = await fetch(GRAPHQL_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ query })
-            });
-
-            if (!response.ok) {
-                throw new Error(`GraphQL request failed: ${response.status}`);
-            }
-
-            const result = await response.json();
-
-            if (result.errors) {
-                throw new Error(`GraphQL error: ${result.errors.map(e => e.message).join(', ')}`);
-            }
-
-            // Extract PDF files from response
-            const entries = result.data?.repository?.object?.entries || [];
-            const pdfFiles = entries
-                .filter(entry => entry.type === 'blob' && entry.name.toLowerCase().endsWith('.pdf'))
-                .map(entry => ({
-                    name: entry.name,
-                    download_url: `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${FOLDER}/${entry.name}`
-                }));
-
-            return pdfFiles;
-        }
-
-        async function fallbackToRestAPI() {
-            console.log('Falling back to REST API');
-            const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FOLDER}`;
-            const response = await fetch(apiUrl);
-            
             if (!response.ok) {
                 throw new Error(`REST API request failed: ${response.status}`);
             }
 
             const files = await response.json();
-            return files.filter(file => file.name && file.name.toLowerCase().endsWith('.pdf'));
+            // Normalize to objects with name and download_url (matches what renderPapers expects)
+            return files
+                .filter(f => f && f.type === 'file' && f.name && f.name.toLowerCase().endsWith('.pdf'))
+                .map(f => ({ name: f.name, download_url: f.download_url || f.html_url }));
         }
 
         function getCachedData() {
             try {
                 const cached = localStorage.getItem(CACHE_KEY);
                 if (!cached) return null;
-
                 const { data, timestamp } = JSON.parse(cached);
                 if (Date.now() - timestamp > CACHE_DURATION) {
                     localStorage.removeItem(CACHE_KEY);
@@ -295,10 +239,7 @@
 
         function setCacheData(data) {
             try {
-                localStorage.setItem(CACHE_KEY, JSON.stringify({
-                    data: data,
-                    timestamp: Date.now()
-                }));
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data, timestamp: Date.now() }));
             } catch (e) {
                 console.warn('Cache write error:', e);
             }
@@ -320,49 +261,69 @@
                 return db - da;
             });
 
+            container.innerHTML = ''; // clear
+
             papers.forEach(file => {
-                // Expecting format: YYYY-MM-DD_Name_With_Underscores.pdf
                 const filename = file.name.replace(/\.pdf$/i, '');
 
-                // Extract Date and Name robustly
                 const datePart = filename.substring(0, 10);
                 const namePartRaw = filename.length > 11 ? filename.substring(11) : filename;
                 const namePart = namePartRaw.replace(/_/g, ' ');
 
-                // Format date to a cleaner look (e.g., June 28, 2026)
                 const maybeDate = new Date(datePart);
                 const formattedDate = !isNaN(maybeDate) ? maybeDate.toLocaleDateString('en-US', {
                     year: 'numeric', month: 'long', day: 'numeric'
                 }) : datePart;
 
-                // Generate HTML element dynamically
                 const card = document.createElement('div');
                 card.className = 'test-card';
-                card.innerHTML = `
-                    <div class="test-info">
-                        <h3>${escapeHtml(namePart) || escapeHtml(filename)}</h3>
-                        <div class="test-date">Uploaded on: ${escapeHtml(formattedDate)}</div>
-                    </div>
-                    <a href="${file.download_url}" download class="btn-download" onclick="handleDownload(event)" aria-label="Download ${escapeHtml(namePart || filename)} PDF" rel="noopener">Download PDF</a>
-                `;
+
+                // Build DOM elements instead of large innerHTML to avoid subtle escaping bugs
+                const info = document.createElement('div');
+                info.className = 'test-info';
+                const h3 = document.createElement('h3');
+                h3.textContent = namePart || filename;
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'test-date';
+                dateDiv.textContent = `Uploaded on: ${formattedDate}`;
+                info.appendChild(h3);
+                info.appendChild(dateDiv);
+
+                const a = document.createElement('a');
+                a.href = file.download_url;
+                a.setAttribute('download', '');
+                a.className = 'btn-download';
+                a.setAttribute('rel', 'noopener');
+                a.setAttribute('aria-label', `Download ${namePart || filename} PDF`);
+                a.textContent = 'Download PDF';
+                // Use event listener so we can access proper event.currentTarget
+                a.addEventListener('click', handleDownload);
+
+                card.appendChild(info);
+                card.appendChild(a);
                 container.appendChild(card);
             });
         }
 
         function handleDownload(event) {
-            const btn = event.target;
-            const originalText = btn.innerText;
-            
+            // event.currentTarget is the anchor we clicked
+            const el = event.currentTarget || event.target;
+            // Make sure we only apply UI feedback to our .btn-download elements
+            const btn = el.closest ? el.closest('.btn-download') : (el.classList && el.classList.contains('btn-download') ? el : null) || el;
+            if (!btn) return;
+
+            const originalText = btn.textContent;
             btn.style.opacity = '0.6';
             btn.style.pointerEvents = 'none';
-            btn.disabled = true;
-            btn.innerText = 'Downloading...';
+            btn.setAttribute('aria-disabled', 'true');
+            btn.textContent = 'Downloading...';
 
+            // Restore after a short delay (download will be handled by browser)
             setTimeout(() => {
-                btn.style.opacity = '1';
-                btn.style.pointerEvents = 'auto';
-                btn.disabled = false;
-                btn.innerText = originalText;
+                btn.style.opacity = '';
+                btn.style.pointerEvents = '';
+                btn.removeAttribute('aria-disabled');
+                btn.textContent = originalText;
             }, 2000);
         }
 
@@ -371,7 +332,6 @@
             loading.innerText = message;
         }
 
-        // Parse date from filename first 10 chars if valid YYYY-MM-DD, fallback to epoch 0
         function parseDateFromFilename(name) {
             if (!name || name.length < 10) return 0;
             const part = name.substring(0, 10);
@@ -379,16 +339,8 @@
             return isNaN(d) ? 0 : d.getTime();
         }
 
-        // Basic HTML escape for text inserted into innerHTML strings
-        function escapeHtml(text) {
-            if (!text) return '';
-            return text.replace(/[&<>\"']/g, function (m) {
-                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
-            });
-        }
-
         // Start fetching papers on page load
-        fetchPapersGraphQL();
+        fetchPapers();
     </script>
 </body>
 </html>
