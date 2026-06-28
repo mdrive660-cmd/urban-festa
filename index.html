@@ -101,10 +101,18 @@
             text-decoration: none;
             border-radius: 6px;
             font-weight: bold;
-            transition: background 0.2s;
+            transition: background 0.2s, opacity 0.2s;
             white-space: nowrap;
+            cursor: pointer;
+            border: none;
+            display: inline-block;
+            text-align: center;
         }
         .btn-download:hover { background-color: var(--green-dark); }
+        .btn-download:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
         footer.site-footer {
             margin-top: 28px;
@@ -171,67 +179,132 @@
         const FOLDER = 'papers'; // The folder where PDFs are kept
 
         const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FOLDER}`;
+        const CACHE_KEY = 'github_papers_cache';
+        const CACHE_DURATION = 3600000; // 1 hour in milliseconds
 
         // Set current year in footer
         document.getElementById('year').textContent = new Date().getFullYear();
 
         async function fetchPapers() {
             try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Failed to fetch files: ' + response.status);
-                const files = await response.json();
+                const cachedData = getCachedData();
+                let files;
 
-                const container = document.getElementById('test-container');
-                document.getElementById('loading').style.display = 'none';
-
-                // Filter out non-pdf files if any exist
-                const pdfFiles = files.filter(file => file.name && file.name.toLowerCase().endsWith('.pdf'));
-
-                if (pdfFiles.length === 0) {
-                    container.innerHTML = '<p style="text-align:center;color:var(--muted);">No mock tests uploaded yet.</p>';
-                    return;
+                if (cachedData) {
+                    // Use cached data
+                    files = cachedData;
+                    console.log('Using cached data');
+                } else {
+                    // Fetch from API
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) throw new Error('Failed to fetch files: ' + response.status);
+                    files = await response.json();
+                    
+                    // Cache the response
+                    setCacheData(files);
+                    console.log('Fetched fresh data from API');
                 }
 
-                // Better sort: extract date portion (YYYY-MM-DD) and sort descending
-                pdfFiles.sort((a, b) => {
-                    const da = parseDateFromFilename(a.name);
-                    const db = parseDateFromFilename(b.name);
-                    return db - da; // newest first
-                });
-
-                pdfFiles.forEach(file => {
-                    // Expecting format: YYYY-MM-DD_Name_With_Underscores.pdf
-                    const filename = file.name.replace(/\.pdf$/i, '');
-
-                    // Extract Date and Name robustly
-                    const datePart = filename.substring(0, 10);
-                    const namePartRaw = filename.length > 11 ? filename.substring(11) : filename;
-                    const namePart = namePartRaw.replace(/_/g, ' ');
-
-                    // Format date to a cleaner look (e.g., June 28, 2026)
-                    const maybeDate = new Date(datePart);
-                    const formattedDate = !isNaN(maybeDate) ? maybeDate.toLocaleDateString('en-US', {
-                        year: 'numeric', month: 'long', day: 'numeric'
-                    }) : datePart;
-
-                    // Generate HTML element dynamically
-                    const card = document.createElement('div');
-                    card.className = 'test-card';
-                    card.innerHTML = `
-                        <div class="test-info">
-                            <h3>${escapeHtml(namePart) || escapeHtml(filename)}</h3>
-                            <div class="test-date">Uploaded on: ${escapeHtml(formattedDate)}</div>
-                        </div>
-                        <a href="${file.download_url}" download class="btn-download" aria-label="Download ${escapeHtml(namePart || filename)} PDF" rel="noopener">Download PDF</a>
-                    `;
-                    container.appendChild(card);
-                });
+                renderPapers(files);
 
             } catch (error) {
                 console.error(error);
                 const loading = document.getElementById('loading');
                 loading.innerText = 'Error loading test papers. Please try again later.';
             }
+        }
+
+        function getCachedData() {
+            try {
+                const cached = localStorage.getItem(CACHE_KEY);
+                if (!cached) return null;
+
+                const { data, timestamp } = JSON.parse(cached);
+                if (Date.now() - timestamp > CACHE_DURATION) {
+                    localStorage.removeItem(CACHE_KEY);
+                    return null;
+                }
+                return data;
+            } catch (e) {
+                console.warn('Cache read error:', e);
+                return null;
+            }
+        }
+
+        function setCacheData(data) {
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({
+                    data: data,
+                    timestamp: Date.now()
+                }));
+            } catch (e) {
+                console.warn('Cache write error:', e);
+            }
+        }
+
+        function renderPapers(files) {
+            const container = document.getElementById('test-container');
+            document.getElementById('loading').style.display = 'none';
+
+            // Filter out non-pdf files if any exist
+            const pdfFiles = files.filter(file => file.name && file.name.toLowerCase().endsWith('.pdf'));
+
+            if (pdfFiles.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:var(--muted);">No mock tests uploaded yet.</p>';
+                return;
+            }
+
+            // Better sort: extract date portion (YYYY-MM-DD) and sort descending
+            pdfFiles.sort((a, b) => {
+                const da = parseDateFromFilename(a.name);
+                const db = parseDateFromFilename(b.name);
+                return db - da; // newest first
+            });
+
+            pdfFiles.forEach(file => {
+                // Expecting format: YYYY-MM-DD_Name_With_Underscores.pdf
+                const filename = file.name.replace(/\.pdf$/i, '');
+
+                // Extract Date and Name robustly
+                const datePart = filename.substring(0, 10);
+                const namePartRaw = filename.length > 11 ? filename.substring(11) : filename;
+                const namePart = namePartRaw.replace(/_/g, ' ');
+
+                // Format date to a cleaner look (e.g., June 28, 2026)
+                const maybeDate = new Date(datePart);
+                const formattedDate = !isNaN(maybeDate) ? maybeDate.toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric'
+                }) : datePart;
+
+                // Generate HTML element dynamically
+                const card = document.createElement('div');
+                card.className = 'test-card';
+                card.innerHTML = `
+                    <div class="test-info">
+                        <h3>${escapeHtml(namePart) || escapeHtml(filename)}</h3>
+                        <div class="test-date">Uploaded on: ${escapeHtml(formattedDate)}</div>
+                    </div>
+                    <a href="${file.download_url}" download class="btn-download" onclick="handleDownload(event)" aria-label="Download ${escapeHtml(namePart || filename)} PDF" rel="noopener">Download PDF</a>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function handleDownload(event) {
+            const btn = event.target;
+            const originalText = btn.innerText;
+            
+            btn.style.opacity = '0.6';
+            btn.style.pointerEvents = 'none';
+            btn.disabled = true;
+            btn.innerText = 'Downloading...';
+
+            setTimeout(() => {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }, 2000);
         }
 
         // Parse date from filename first 10 chars if valid YYYY-MM-DD, fallback to epoch 0
