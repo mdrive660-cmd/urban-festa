@@ -177,41 +177,103 @@
         const USERNAME = 'mdrive660-cmd';
         const REPO = 'urban-festa';
         const FOLDER = 'papers'; // The folder where PDFs are kept
+        const BRANCH = 'main';
 
-        const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FOLDER}`;
-        const CACHE_KEY = 'github_papers_cache';
+        // GitHub GraphQL API endpoint
+        const GRAPHQL_URL = 'https://api.github.com/graphql';
+        const CACHE_KEY = 'github_papers_cache_graphql';
         const CACHE_DURATION = 3600000; // 1 hour in milliseconds
 
         // Set current year in footer
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        async function fetchPapers() {
+        async function fetchPapersGraphQL() {
             try {
                 const cachedData = getCachedData();
-                let files;
+                let papers;
 
                 if (cachedData) {
                     // Use cached data
-                    files = cachedData;
-                    console.log('Using cached data');
+                    papers = cachedData;
+                    console.log('Using cached papers from GraphQL');
                 } else {
-                    // Fetch from API
-                    const response = await fetch(apiUrl);
-                    if (!response.ok) throw new Error('Failed to fetch files: ' + response.status);
-                    files = await response.json();
+                    // Fetch from GraphQL API - no authentication required for public repos
+                    papers = await queryGitHubGraphQL();
+                    
+                    if (papers.length === 0) {
+                        console.warn('No papers found from GraphQL, attempting fallback');
+                        papers = await fallbackToRestAPI();
+                    }
                     
                     // Cache the response
-                    setCacheData(files);
-                    console.log('Fetched fresh data from API');
+                    setCacheData(papers);
+                    console.log('Fetched fresh papers from GraphQL');
                 }
 
-                renderPapers(files);
+                renderPapers(papers);
 
             } catch (error) {
-                console.error(error);
-                const loading = document.getElementById('loading');
-                loading.innerText = 'Error loading test papers. Please try again later.';
+                console.error('GraphQL fetch error:', error);
+                handleError('Error loading test papers. Please try again later.');
             }
+        }
+
+        async function queryGitHubGraphQL() {
+            const query = `
+            query {
+                repository(owner: "${USERNAME}", name: "${REPO}") {
+                    object(expression: "${BRANCH}:${FOLDER}") {
+                        ... on Tree {
+                            entries {
+                                name
+                                type
+                            }
+                        }
+                    }
+                }
+            }`;
+
+            const response = await fetch(GRAPHQL_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query })
+            });
+
+            if (!response.ok) {
+                throw new Error(`GraphQL request failed: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.errors) {
+                throw new Error(`GraphQL error: ${result.errors.map(e => e.message).join(', ')}`);
+            }
+
+            // Extract PDF files from response
+            const entries = result.data?.repository?.object?.entries || [];
+            const pdfFiles = entries
+                .filter(entry => entry.type === 'blob' && entry.name.toLowerCase().endsWith('.pdf'))
+                .map(entry => ({
+                    name: entry.name,
+                    download_url: `https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${FOLDER}/${entry.name}`
+                }));
+
+            return pdfFiles;
+        }
+
+        async function fallbackToRestAPI() {
+            console.log('Falling back to REST API');
+            const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FOLDER}`;
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error(`REST API request failed: ${response.status}`);
+            }
+
+            const files = await response.json();
+            return files.filter(file => file.name && file.name.toLowerCase().endsWith('.pdf'));
         }
 
         function getCachedData() {
@@ -242,26 +304,23 @@
             }
         }
 
-        function renderPapers(files) {
+        function renderPapers(papers) {
             const container = document.getElementById('test-container');
             document.getElementById('loading').style.display = 'none';
 
-            // Filter out non-pdf files if any exist
-            const pdfFiles = files.filter(file => file.name && file.name.toLowerCase().endsWith('.pdf'));
-
-            if (pdfFiles.length === 0) {
+            if (!papers || papers.length === 0) {
                 container.innerHTML = '<p style="text-align:center;color:var(--muted);">No mock tests uploaded yet.</p>';
                 return;
             }
 
-            // Better sort: extract date portion (YYYY-MM-DD) and sort descending
-            pdfFiles.sort((a, b) => {
+            // Sort by date descending (newest first)
+            papers.sort((a, b) => {
                 const da = parseDateFromFilename(a.name);
                 const db = parseDateFromFilename(b.name);
-                return db - da; // newest first
+                return db - da;
             });
 
-            pdfFiles.forEach(file => {
+            papers.forEach(file => {
                 // Expecting format: YYYY-MM-DD_Name_With_Underscores.pdf
                 const filename = file.name.replace(/\.pdf$/i, '');
 
@@ -307,6 +366,11 @@
             }, 2000);
         }
 
+        function handleError(message) {
+            const loading = document.getElementById('loading');
+            loading.innerText = message;
+        }
+
         // Parse date from filename first 10 chars if valid YYYY-MM-DD, fallback to epoch 0
         function parseDateFromFilename(name) {
             if (!name || name.length < 10) return 0;
@@ -323,7 +387,8 @@
             });
         }
 
-        fetchPapers();
+        // Start fetching papers on page load
+        fetchPapersGraphQL();
     </script>
 </body>
 </html>
