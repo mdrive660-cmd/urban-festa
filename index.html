@@ -3,120 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anand Kumar | Data & Cloud Professional</title>
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Student Download Portal</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f9f9f9; color: #333; }
+        h1 { color: #2c3e50; text-align: center; }
+        .loading { text-align: center; font-style: italic; color: #666; }
+        .test-list { margin-top: 20px; }
+        .test-card { background: white; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .test-info h3 { margin: 0 0 5px 0; color: #2980b9; }
+        .test-date { font-size: 0.85rem; color: #7f8c8d; }
+        .btn-download { background-color: #27ae60; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; transition: background 0.2s; }
+        .btn-download:hover { background-color: #219653; }
+    </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="nav-brand">Anand Kumar</div>
-        <ul class="nav-links">
-            <li><a href="#about">About</a></li>
-            <li><a href="#projects">Projects</a></li>
-            <li><a href="#downloads">Downloads</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
-        <div class="theme-switcher">
-            <button id="theme-toggle">🌙</button>
-        </div>
-    </nav>
+    <h1>📝 Download Mock Test Papers</h1>
+    <hr>
 
-    <header id="hero" class="hero-section">
-        <h1 id="hero-headline"></h1> 
-        <p>An AI/ML technical consultant with 4+ of experience, specializing in translating complex business challenges into scalable, data-driven solutions.</p>
-        <div class="hero-buttons">
-            <a href="#projects" class="cta-button">View My Work</a>
-            <a href="Anand_Kumar_Resume.pdf" class="cta-button secondary" download>Download Resume 📜</a>
-        </div>
-    </header>
+    <div id="loading" class="loading">Fetching latest test papers...</div>
+    <div id="test-container" class="test-list"></div>
 
-    <main>
-        <section id="about" class="content-section" data-aos="fade-up">
-            <h2>About Me</h2>
-            <p>I am an IT professional with a Bachelor's degree in Information Technology, specializing in the development domain. I have proven expertise as a Python programmer with a focus on project support, maintenance, and automation. I am eager to leverage my background, bringing a blend of technical expertise and problem-solving acumen to drive successful project outcomes.</p>
-            
-            <div class="skills-certifications">
-                <div class="skills-list" data-aos="fade-up" data-aos-delay="100">
-                    <h3>Core Competencies</h3>
-                    <ul>
-                        <li>Python Programming</li>
-                        <li>AWS Cloud Services</li>
-                        <li>Snowflake Database</li>
-                        <li>Unix Shell Scripting</li>
-                        <li>CI/CD Pipelines (Jenkins)</li>
-                        <li>Version Control (Git)</li>
-                    </ul>
-                </div>
-                <div class="skills-list" data-aos="fade-up" data-aos-delay="200">
-                    <h3>Certifications</h3>
-                    <ul>
-                        <li>PCAP™ – Certified Associate in Python Programming</li>
-                        <li>Snowflake Certified: SnowPro Core</li>
-                        <li>AWS Certified Cloud Practitioner</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
+    <script>
+        // CONFIGURATION: Change these to your actual GitHub details
+        const USERNAME = 'mdrive660-cmd'; 
+        const REPO = 'urban-festa';
+        const FOLDER = 'papers'; // The folder where PDFs are kept
 
-        <section id="projects" class="content-section">
-            <h2 data-aos="fade-up">My Projects</h2>
+        const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FOLDER}`;
 
-            <div class="filter-buttons" data-aos="fade-up">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="data-engineering">Data Engineering</button>
-                <button class="filter-btn" data-filter="automation">Automation</button>
-                <button class="filter-btn" data-filter="cloud">Cloud</button>
-            </div>
+        async function fetchPapers() {
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Failed to fetch files');
+                const files = await response.json();
+                
+                const container = document.getElementById('test-container');
+                document.getElementById('loading').style.display = 'none';
 
-            <div class="project-grid">
-                <div class="project-card" data-category="data-engineering" data-aos="fade-up" data-aos-delay="100">
-                    <h3>Insurance Premium Rating Engine</h3>
-                    <p>Developed and maintained a rating engine for an Insurance firm to determine policy premiums. Utilized Python, SQL, and Shell Scripting within a Snowflake database environment. Implemented CI/CD pipelines for automated deployment.</p>
-                    <a href="#" target="_blank">Read More</a>
-                </div>
-                <div class="project-card" data-category="automation" data-aos="fade-up" data-aos-delay="200">
-                    <h3>Automated Data Validation Scripts</h3>
-                    <p>Developed Python scripts to support the testing team by automating data validation and quality checks between PostgreSQL and Snowflake databases. Created a testing GUI using PyQt5 to streamline the process.</p>
-                     <a href="#" target="_blank">Read More</a>
-                </div>
-                <div class="project-card" data-category="cloud" data-aos="fade-up" data-aos-delay="300">
-                    <h3>Olympic Games Data Warehouse</h3>
-                    <p>An academic project to manage and analyze Olympic data. Loaded CSV data from an AWS S3 bucket and utilized Amazon Redshift for data warehousing and query execution to gain insights on athletes and rankings.</p>
-                     <a href="#" target="_blank">Read More</a>
-                </div>
-            </div>
-        </section>
+                // Filter out non-pdf files if any exist
+                const pdfFiles = files.filter(file => file.name.endsWith('.pdf'));
 
-        <section id="downloads" class="content-section">
-            <h2 data-aos="fade-up">Downloads</h2>
-            <div class="download-list" data-aos="fade-up" data-aos-delay="100">
-                <div class="download-item">
-                    <span class="file-icon">📁</span>
-                    <div class="file-info">
-                        <h3>Portfolio Source Code</h3>
-                        <p>The complete source code for this portfolio website, built with HTML, CSS, and vanilla JavaScript.</p>
-                    </div>
-                    <a href="downloads/portfolio-source-code.zip" class="download-btn" download>Download .zip</a>
-                </div>
-            </div>
-        </section>
+                if(pdfFiles.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;">No mock tests uploaded yet.</p>';
+                    return;
+                }
 
-        <section id="contact" class="content-section" data-aos="fade-up">
-            <h2>Get In Touch</h2>
-            <p>I'm currently not open to new opportunities. Enhancing my skills to next level!</p>
-            <p><a href="https://github.com/mdrive660-cmd">Github id</a></p>
-            <a href="mailto:xxxxxxxxxxx@gmail.com" class="cta-button">Email Me</a>
-        </section>
-    </main>
+                // Sort files so the newest date appears first
+                pdfFiles.reverse();
 
-    <footer>
-        <p>&copy; 2025 Anand Kumar. All Rights Reserved.</p>
-    </footer>
+                pdfFiles.forEach(file => {
+                    // Expecting format: YYYY-MM-DD_Name_With_Underscores.pdf
+                    const filename = file.name.replace('.pdf', '');
+                    
+                    // Extract Date and Name
+                    const datePart = filename.substring(0, 10); // "YYYY-MM-DD"
+                    const namePart = filename.substring(11).replace(/_/g, ' '); // "Name With Spaces"
 
-    <script src="https://unpkg.com/typeit@8.7.1/dist/index.umd.js"></script>
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="script.js"></script>
+                    // Format date to a cleaner look (e.g., June 28, 2026)
+                    const formattedDate = new Date(datePart).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    });
+
+                    // Generate HTML element dynamically
+                    const card = document.createElement('div');
+                    card.className = 'test-card';
+                    card.innerHTML = `
+                        <div class="test-info">
+                            <h3>${namePart || filename}</h3>
+                            <div class="test-date">Uploaded on: ${formattedDate !== 'Invalid Date' ? formattedDate : datePart}</div>
+                        </div>
+                        <a href="${file.download_url}" download class="btn-download">Download PDF</a>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading').innerText = 'Error loading test papers. Please try again later.';
+            }
+        }
+
+        fetchPapers();
+    </script>
 </body>
 </html>
